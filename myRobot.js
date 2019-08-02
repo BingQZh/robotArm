@@ -3,6 +3,7 @@ var canvas;
 var gl;
 var vertexCount = 36;
 var program;
+
 // Three Vertices        
 var vertices = [
     vec4( -0.5, -0.5,  0.5, 1.0 ),
@@ -88,19 +89,19 @@ function createNode(transform, render, sibling, child){
         transform: transform,
         render: render,
         sibling: sibling,
-        child: child,
+        child: child
     }
     return node;
 }
 for(var i=0; i<3;i++)
     figure[i] = createNode(null,null,null,null);
 
-function initNode(id){
+function initNodes(id){
     var m = mat4();
     switch(id){
         case baseP.id:
             m = rotate(theta[baseP.id], 0, 1, 0);
-            figure[base.id]=createNode(m, base, null, lowerArmP.id);
+            figure[baseP.id]=createNode(m, base, null, lowerArmP.id);
             break;
         case lowerArmP.id:
             m = translate(0.0, baseP.height, 0.0);
@@ -114,6 +115,28 @@ function initNode(id){
             break;
     }
 }
+/*function initNodes(id){
+    var m=mat4();
+    switch(id){
+        case baseId:
+            m=rotate(theta[0],0,1,0);
+            figure[baseId]=createNode(m,base,null,lowerArmId)
+            break;
+
+        case lowerArmId:
+            m = translate(0.0, baseP.height, 0.0);
+            m = mult(m, rotate(theta[1], 0, 0, 1 ));
+            figure[lowerArmId]=createNode(m,lowerArm,null,upperArmId)
+            break;
+
+        case upperArmId:
+            m=translate(0.0, lowerArmP.height, 0.0);
+            m=mult(m, rotate(theta[2], 0, 0, 1) );
+            figure[upperArmId]=createNode(m,upperArm,null,null);
+            break;
+
+    }
+}*/
 function traverse(id){
     if(id == null)
         return;
@@ -159,10 +182,6 @@ window.onload = function init() {
     gl.vertexAttribPointer( vPosition, 2, gl.FLOAT, false, 0, 0 );
     gl.enableVertexAttribArray( vPosition );   
 
-    var vPosition = gl.getAttribLocation( program, "vPosition" );
-    gl.vertexAttribPointer( vPosition, 3, gl.FLOAT, false, 0, 0 );
-    gl.enableVertexAttribArray( vPosition );
-
     cBuffer = gl.createBuffer();
     gl.bindBuffer( gl.ARRAY_BUFFER, cBuffer );
     gl.bufferData( gl.ARRAY_BUFFER, flatten(colors), gl.STATIC_DRAW );
@@ -188,7 +207,7 @@ window.onload = function init() {
     };
 
     for(var i=0; i<3;i++)
-        initNode(i);
+        initNodes(i);
     modelViewMatrixLoc = gl.getUniformLocation(program, "modelViewMatrix");
 
     render();
