@@ -65,6 +65,9 @@ void main()
 
 
 <h1>CMPT361 Assignment3 Robotic Arm</h1>
+<p>Use the three sliders to interactively control the
+rotation of the three joint angles. </p>
+<p>Click on the screen to identify a desired target in the XY plane for the arm to reach the ball.</p>
 
 <body>
 <canvas id="gl-canvas" width="512" height="512">
@@ -73,11 +76,11 @@ Oops ... your browser doesn't support the HTML5 canvas element
 </body>
 
 
-<div>Body &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp -180 <input id="sliderBody" type="range"
- min="-180" max="180" step="10" value="0" class = "slider"/>180</div><br/>
+<div>Body &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp <input id="sliderBody" type="range"
+ min="-180" max="180" step="10" value="0" class = "slider"/></div><br/>
 
-<div>Lower Arm -180 <input id="sliderLower" type="range" min="-180" max="180" step="10" value="0" class = "slider"/>180</div><br/>
+<div>Lower Arm <input id="sliderLower" type="range" min="-180" max="180" step="10" value="0" class = "slider"/></div><br/>
 
-<div>Upper Arm -180 <input id="sliderUpper" type="range" min="-180" max="180" step="10" value="0" class = "slider"/>180</div><br/>
+<div>Upper Arm <input id="sliderUpper" type="range" min="-180" max="180" step="10" value="0" class = "slider"/></div><br/>
 
 </html>
