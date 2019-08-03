@@ -1,23 +1,20 @@
+/*-----------CMPT361 AS3: ROBOTIC ARM--------------------
+Name: Bing Qiu Zhang
+Student#: 301248604
+
+This assignment implemented a robotic arm using WebGL.
+The arm is composed of 3 components by 2 joints.
+Each component can rotate with sliders.
+Robotic arm reaches the clicking position on the canvas automatically.
+
+-------------------------------------------------------*/
+
+
 var canvas, gl, program;
 
 var points = [];
 var colors = [];
 var displancement = 1;
-
-var ballMouseLocation = [];
-var thetaL, thetaU;
-
-var vertices = [
-    vec4( -0.5, -0.5,  0.5, 1.0 ),
-    vec4( -0.5,  0.5,  0.5, 1.0 ),
-    vec4(  0.5,  0.5,  0.5, 1.0 ),
-    vec4(  0.5, -0.5,  0.5, 1.0 ),
-    vec4( -0.5, -0.5, -0.5, 1.0 ),
-    vec4( -0.5,  0.5, -0.5, 1.0 ),
-    vec4(  0.5,  0.5, -0.5, 1.0 ),
-    vec4(  0.5, -0.5, -0.5, 1.0 )
-];
-var vertexCount = 36;
 
 var colorTmp = {
   black: vec4( 0.0, 0.0, 0.0, 0.7 ),
@@ -99,9 +96,19 @@ var ballP = {
   vec4(0.8,1.98,0,1.0),
   vec4(1,2,0,1.0),],
 }
-for (var k =0; k<ballP.vertices.length;k++)
-  ballP.colors.push(colorTmp.red);
 
+
+var vertices = [
+    vec4( -0.5, -0.5,  0.5, 1.0 ),
+    vec4( -0.5,  0.5,  0.5, 1.0 ),
+    vec4(  0.5,  0.5,  0.5, 1.0 ),
+    vec4(  0.5, -0.5,  0.5, 1.0 ),
+    vec4( -0.5, -0.5, -0.5, 1.0 ),
+    vec4( -0.5,  0.5, -0.5, 1.0 ),
+    vec4(  0.5,  0.5, -0.5, 1.0 ),
+    vec4(  0.5, -0.5, -0.5, 1.0 )
+];
+var vertexCount = 36;
 
 var modelViewMatrix=mat4();
 var ballmodelViewMatrix= mat4();
@@ -121,8 +128,8 @@ var thetaTmp = {
   upperArm:0.0,
 }
 
-//----------------------------------------------------------------------------
-
+/*------------COLORCUBE--------------------*/
+//from lecture
 function quad(  a,  b,  c,  d ) {
     colors.push(vertexColors[a]);
     points.push(vertices[a]);
@@ -224,16 +231,11 @@ window.onload = function init() {
     gl.clearColor( 0.9, 0.9, 0.1, 0.4 );
     gl.enable( gl.DEPTH_TEST );
 
-    //
-    //  Load shaders and initialize attribute buffers
-    //
     program = initShaders( gl, "vertex-shader", "fragment-shader" );
 
     gl.useProgram( program );
 
     colorCube();
-
-    // Create and initialize  buffer objects
 
     vBuffer = gl.createBuffer();
     gl.bindBuffer( gl.ARRAY_BUFFER, vBuffer );
@@ -258,6 +260,9 @@ window.onload = function init() {
     vPositionB = gl.getAttribLocation( program, "vPosition");
     gl.vertexAttribPointer( vPositionB, 2, gl.FLOAT, false, 0, 0);
 
+    for (var k =0; k<ballP.vertices.length;k++)
+      ballP.colors.push(colorTmp.red);
+
     cBufferB = gl.createBuffer();
     gl.bindBuffer( gl.ARRAY_BUFFER, cBufferB );
     gl.bufferData( gl.ARRAY_BUFFER, flatten(ballP.colors), gl.STATIC_DRAW );
@@ -273,10 +278,11 @@ window.onload = function init() {
     };
     canvas.addEventListener("click", ball,false);
 
-        for(var i=0; i<3;i++){
-            initNodes(i);
-        }
+    for(var i=0; i<3;i++){
+      initNodes(i);
+    }
     modelViewMatrixLoc = gl.getUniformLocation(program, "modelViewMatrix");
+
     render();
 }
 /*---------------------------------------------------*/
@@ -303,6 +309,7 @@ function upperArm() {
     gl.uniformMatrix4fv( modelViewMatrixLoc,  false, flatten(t) );
     gl.drawArrays( gl.TRIANGLES, 0, vertexCount );
 }
+modelViewMatrixBall = mult(scalem(0.35,0.35,1),mat4())
 
 
 /*---------------------------------------------------*/
@@ -311,6 +318,7 @@ var render = function() {
     gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT );
 
     gl.bindBuffer(gl.ARRAY_BUFFER, vBuffer);
+    gl.bufferData( gl.ARRAY_BUFFER, flatten(points), gl.STATIC_DRAW );
     gl.vertexAttribPointer(vPosition,4,gl.FLOAT,false,0,0);
     gl.uniformMatrix4fv( gl.getUniformLocation(program, "projectionMatrix"),  false, flatten(projectionMatrix) );
     gl.uniformMatrix4fv( modelViewMatrixLoc,  false, flatten(modelViewMatrix) );
@@ -318,12 +326,19 @@ var render = function() {
     traverse(baseP.id);
 
     if(ballP.if){//if ball exists
+      //console.log("drawball");
       drawBall();
+
+      gl.bindBuffer( gl.ARRAY_BUFFER, bBuffer );
+      gl.bufferData( gl.ARRAY_BUFFER, flatten(ballP.vertices), gl.STATIC_DRAW );
+
+      gl.vertexAttribPointer(vPositionB,4,gl.FLOAT,false,0,0);
+      gl.uniformMatrix4fv( gl.getUniformLocation(program, "modelViewMatrix"),  false, flatten(modelViewMatrixBall) );
+      gl.drawArrays(gl.TRIANGLE_FAN, 0, ballP.vertices.length);
     }
-    else{
+    else
       updateAnimation();
 
-    }
     requestAnimFrame(render);
 }
 function updateAnimation(){
@@ -346,14 +361,7 @@ function updateAnimation(){
     initNodes(upperArmP.id);
 }
 function drawBall(){
-      console.log("BALL EXISIT");
-      gl.bindBuffer(gl.ARRAY_BUFFER, bBuffer);
-      gl.vertexAttribPointer(vPositionB,4,gl.FLOAT,false,0,0);
-      gl.uniformMatrix4fv( gl.getUniformLocation(program, "projectionMatrix"),  false, flatten(projectionMatrix) );
-      gl.uniformMatrix4fv( gl.getUniformLocation(program, "modelViewMatrix"),  false, flatten(modelViewMatrixBall) );
-      gl.drawArrays(gl.TRIANGLE_FAN, 0, ballP.vertices.length);
-
-      //animating the arms to initia position
+      //console.log("BALL EXISIT");
       if (thetaL<0 && thetaU<0){
         if(theta[lowerArmP.id]>=thetaL){
           theta[lowerArmP.id]-=1;
@@ -409,8 +417,6 @@ function drawBall(){
         if(theta[lowerArmP.id]<=thetaL){
           theta[lowerArmP.id]+=1;
           initNodes(lowerArmP.id);
-
-
         }
         if(theta[upperArmP.id]<=thetaU){
           theta[upperArmP.id]+=1;
@@ -421,79 +427,68 @@ function drawBall(){
           thetaTmp.base=0;
           thetaTmp.lowerArm=0;
           thetaTmp.upperArm=0;
-
         }
       }
-
     }
 
-
-
-
 /*------------------BALL-----------------------------*/
+function resetArm(){
+  document.getElementById("sliderBody").value="0";
+  document.getElementById("sliderLower").value="0";
+  document.getElementById("sliderUpper").value="0";
+  for (var i=0; i<theta.length; i++){
+    theta[i]=0;
+    initNodes(i);
+  }
+}
+function coordination(){
+  var wIndex = canvas.width/2; // half of canvas width
+  if(ballP.center[0]<=wIndex && ballP.center[1]<=wIndex){ //top left
+    ballP.center[0]=(-10*(wIndex-ballP.center[0])/wIndex)
+    ballP.center[1]=(10*(wIndex-ballP.center[1])/wIndex)
+  }
+  else if(ballP.center[0]<=wIndex && ballP.center[1]>wIndex){ //bottom left
+    ballP.center[0]=(-10*(wIndex-ballP.center[0])/wIndex)
+    ballP.center[1]=(10*(wIndex-ballP.center[1])/wIndex)
+  }
+  else if(ballP.center[0]>wIndex && ballP.center[1]<=wIndex){ //top right
+    ballP.center[0]=(10*(ballP.center[0]-wIndex)/wIndex)
+    ballP.center[1]=(10*(wIndex-ballP.center[1])/wIndex)
+  }
+  else if(ballP.center[0]>wIndex && ballP.center[1]>wIndex){ //bottom right
+    ballP.center[0]=(10*(ballP.center[0]-wIndex)/wIndex)
+    ballP.center[1]=(10*(wIndex-ballP.center[1])/wIndex)
+
+  }
+}
 //get ball location and update theta[]
 function ball(){
   //console.log(event.clientX+","+event.clientY);
   ballP.if = true;
   var rect = canvas.getBoundingClientRect();
   ballP.center = [event.clientX-rect.left, event.clientY-rect.top];
-  //console.log(ballP.center);
   modelViewMatrixBall = mult(scalem(0.35,0.35,1),mat4())
-
-  ballMouseLocation[0]=ballP.center[0];
-  ballMouseLocation[1]=ballP.center[1];
-  if(ballMouseLocation[0]<=256 && ballMouseLocation[1]<=256){ //top left
-    ballMouseLocation[0]=(-10*(256-ballMouseLocation[0])/256)-0.4
-    ballMouseLocation[1]=(10*(256-ballMouseLocation[1])/256)-0.5
-  }
-  else if(ballMouseLocation[0]>256 && ballMouseLocation[1]<=256){ //top right
-    ballMouseLocation[0]=(10*(ballMouseLocation[0]-256)/256)-0.2
-    ballMouseLocation[1]=(10*(256-ballMouseLocation[1])/256)-0.5
-  }
-  else if(ballMouseLocation[0]<=256 && ballMouseLocation[1]>256){ //bottom left
-    ballMouseLocation[0]=(-10*(256-ballMouseLocation[0])/256)-0.4
-    ballMouseLocation[1]=(10*(256-ballMouseLocation[1])/256)-0.5
-  }
-  else if(ballMouseLocation[0]>256 && ballMouseLocation[1]>256){ //bottom right
-    ballMouseLocation[0]=(10*(ballMouseLocation[0]-256)/256)-0.2
-    ballMouseLocation[1]=(10*(256-ballMouseLocation[1])/256)-0.5
-
-  }
-
+  coordination();
   //IK calculations-----------------------
-  var xe= ballMouseLocation[0]+0.4;
-  var ye= ballMouseLocation[1]-1.45;
-  var lLower= lowerArmP.height;
-  var lUpper= upperArmP.height;
-  var thetar= Math.acos((xe/(Math.sqrt((Math.pow(xe,2))+(Math.pow(ye,2))))));
-  document.getElementById("sliderBody").value="0";
-  document.getElementById("sliderLower").value="0";
-  document.getElementById("sliderUpper").value="0";
-  theta[baseP.id]=0;
-  theta[lowerArmP.id]=0;
-  theta[upperArmP.id]=0;
-  initNodes(baseP.id);
-  initNodes(lowerArmP.id);
-  initNodes(upperArmP.id);
+  var xe= ballP.center[0]+0.4;
+  var ye= ballP.center[1]-1.45;
+  var lower= lowerArmP.height;
+  var upper= upperArmP.height;
+  var thetaTmp= Math.acos((xe/(Math.sqrt((Math.pow(xe,2))+(Math.pow(ye,2))))));
+  resetArm();
 
-  //console.log(xe,ye)
-
-  thetaL=((thetar-(Math.acos(((Math.pow(lLower,2))+(Math.pow(xe,2))+(Math.pow(ye,2))-(Math.pow(lUpper,2)))/(2*lLower*Math.sqrt((Math.pow(xe,2))+(Math.pow(ye,2)))))))*(180/Math.PI))-90;
-  thetaU=(Math.PI-(Math.acos(((Math.pow(lLower,2))+(Math.pow(lUpper,2))-(Math.pow(xe,2))-(Math.pow(ye,2)))/(2*lLower*lUpper))))*(180/Math.PI);
+  thetaL=((thetaTmp-(Math.acos(((Math.pow(lower,2))+(Math.pow(xe,2))+(Math.pow(ye,2))-(Math.pow(upper,2)))/(2*lower*Math.sqrt((Math.pow(xe,2))+(Math.pow(ye,2)))))))*(180/Math.PI))-90;
+  thetaU=(Math.PI-(Math.acos(((Math.pow(lower,2))+(Math.pow(upper,2))-(Math.pow(xe,2))-(Math.pow(ye,2)))/(2*lower*upper))))*(180/Math.PI);
 
   if(ye<0){
-    ye=-(ballMouseLocation[1]-1.45);
-    xe=-(ballMouseLocation[0]+0.4);
-    thetar= Math.acos((xe/(Math.sqrt((Math.pow(xe,2))+(Math.pow(ye,2))))));
-    thetaL=180+(((thetar-(Math.acos(((Math.pow(lLower,2))+(Math.pow(xe,2))+(Math.pow(ye,2))-(Math.pow(lUpper,2)))/(2*lLower*Math.sqrt((Math.pow(xe,2))+(Math.pow(ye,2)))))))*(180/Math.PI))-90);
-    thetaU=(Math.PI-(Math.acos(((Math.pow(lLower,2))+(Math.pow(lUpper,2))-(Math.pow(xe,2))-(Math.pow(ye,2)))/(2*lLower*lUpper))))*(180/Math.PI);
-
+    ye=-(ballP.center[1]-1.45);
+    xe=-(ballP.center[0]+0.4);
+    thetaTmp= Math.acos((xe/(Math.sqrt((Math.pow(xe,2))+(Math.pow(ye,2))))));
+    thetaL=180+(((thetaTmp-(Math.acos(((Math.pow(lower,2))+(Math.pow(xe,2))+(Math.pow(ye,2))-(Math.pow(upper,2)))/(2*lower*Math.sqrt((Math.pow(xe,2))+(Math.pow(ye,2)))))))*(180/Math.PI))-90);
+    thetaU=(Math.PI-(Math.acos(((Math.pow(lower,2))+(Math.pow(upper,2))-(Math.pow(xe,2))-(Math.pow(ye,2)))/(2*lower*upper))))*(180/Math.PI);
   }
-
   //console.log("theta",thetaL, thetaU);
-
-  ballLive=true;
-  ballmodelViewMatrix= mult(translate(ballMouseLocation[0],ballMouseLocation[1],1),ballmodelViewMatrix)
+  modelViewMatrixBall= mult(translate(ballP.center[0],ballP.center[1],1),modelViewMatrixBall)
 }
 /*---------------------------------------------------*/
 
