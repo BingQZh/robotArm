@@ -1,6 +1,7 @@
 CMPT361 Assignment3 - Robotic Arm
 Name: Bing Qiu Zhang
 Student#: 301248604
+- Having problem on Win10 Chrome but works on Mac Chrome and Win10 Microsoft Edge.
 
 - This assignment implemented all the steps required in the document.
 
